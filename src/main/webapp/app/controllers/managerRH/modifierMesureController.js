@@ -1,0 +1,63 @@
+var app = angular.module("lambda.bilan");
+
+
+
+app.controller("modifierMesureController",
+    ['$scope', '$filter','security', 'HTTP_METHOD','properties', 'utils','dao',
+        function ($scope, $filter ,security, HTTP_METHOD, properties , utils,dao ) {
+
+
+            var idObjectif;
+            var idMesure;
+            $scope.action.modifierMesure=function(mesure,_idObjectif){
+                $scope.comment=mesure.commentMesurer;
+                $scope.poids=mesure.poidsMesure;
+                $scope.resultat=mesure.resultatMesure;
+                $scope.mode=mesure.modeAccesMesure;
+                $scope.idResp= mesure.responsableMesure.idResponsableMesure;
+                idObjectif=_idObjectif;
+                idMesure=mesure.idMesure;
+            };
+
+            $scope.modifierMesure=function(){
+                var mesure= {
+                    "idMesure":idMesure,
+                    "commentMesurer":$scope.comment,
+                    "poidsMesure":$scope.poids,
+                    "resultatMesure":$scope.resultat,
+                    "modeAccesMesure":$scope.mode,
+                    "responsableMesure":{"idResponsableMesure":$scope.idResp},
+                    "objectif":{"idObjectif":idObjectif}
+                };
+
+                var task = dao.getData(properties.urlMesure+"/"+idMesure, $scope.headerBasic, HTTP_METHOD.put,mesure);
+                //on attent la reponse...
+                task.promise.then(function (result) {
+                    // fin d'attente
+                    // erreur ?
+                    if (result.err == 0) {
+                        //Pas d'erreur
+                        $scope.errors.show = false;
+                        $scope.succes.show=true;
+                        $scope.succes.message=result.data;
+                        $scope.action.listerObjectif();
+
+                    } else {
+                        // il y a eu des erreurs
+                        $scope.succes.show=false;
+                        $scope.errors.show = true;
+                        $scope.errors.title = properties.modifierMesureError;
+                        $scope.errors.messages = utils.getErrors(result);
+                    }
+                });
+            };
+
+
+
+
+
+
+        }])
+;
+
+
